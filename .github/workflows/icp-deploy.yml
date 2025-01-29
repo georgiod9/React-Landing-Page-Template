@@ -100,11 +100,10 @@ jobs:
           # Export the build directory for use in later steps
           echo "build_dir=$BUILD_DIR" >> $GITHUB_OUTPUT
         
-      - name: Create and Check Zip
-        id: create_zip
+      - name: Create Build Directory
+        id: create_build
         working-directory: .
         run: |
-          echo "Creating zip file..."
           echo "Current directory: $(pwd)"
           
           # Detect build directory directly
@@ -125,22 +124,12 @@ jobs:
             exit 1
           fi
           
-          echo "Creating build directory..."
-          mkdir -p build
-          
-          echo "Zipping $BUILD_DIR contents..."
-          cd $BUILD_DIR
-          zip -r ../build/build.zip .
-          
-          echo "Checking zip file..."
-          cd ../build
-          ls -la
-          echo "Zip file contents:"
-          unzip -l build.zip
+          echo "Build directory contents:"
+          ls -la $BUILD_DIR
         
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
-          path: build/build.zip
+          path: dist/**/*
           retention-days: 1
