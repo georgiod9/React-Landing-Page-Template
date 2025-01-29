@@ -66,14 +66,39 @@ jobs:
           echo "Modified package.json scripts:"
           cat package.json | grep '"scripts"' -A 10
           
+          # Detect build tool from package.json
+          if grep -q '"vite"' package.json; then
+            echo "Detected Vite project"
+            BUILD_DIR="dist"
+          elif grep -q '"react-scripts"' package.json; then
+            echo "Detected Create React App project"
+            BUILD_DIR="build"
+          else
+            echo "Using default build directory"
+            BUILD_DIR="dist"
+          fi
+          
+          echo "Build directory will be: $BUILD_DIR"
+          
           echo "Running build command..."
-          ${{ steps.detect-package-manager.outputs.manager }} run build --verbose
+          CI=false ${{ steps.detect-package-manager.outputs.manager }} run build --verbose
           
-          echo "Build completed. Checking dist directory structure:"
-          tree dist || ls -R dist
+          echo "Checking for build output..."
+          if [ -d "$BUILD_DIR" ]; then
+            echo "Found build directory: $BUILD_DIR"
+            echo "Directory structure:"
+            tree $BUILD_DIR || ls -R $BUILD_DIR
+            echo "Directory sizes:"
+            du -sh $BUILD_DIR/*
+          else
+            echo "Error: Build directory $BUILD_DIR not found"
+            echo "Checking current directory contents:"
+            ls -la
+            exit 1
+          fi
           
-          echo "Checking dist directory sizes:"
-          du -sh dist/*
+          # Export the build directory for use in later steps
+          echo "build_dir=$BUILD_DIR" >> $GITHUB_OUTPUT
         
       - name: Create and Check Zip
         working-directory: .
