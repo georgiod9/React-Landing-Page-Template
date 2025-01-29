@@ -52,6 +52,8 @@ jobs:
         
       - name: Build
         working-directory: .
+        env:
+          CI: false
         run: |
           echo "Starting build process..."
           echo "Current directory: $(pwd)"
