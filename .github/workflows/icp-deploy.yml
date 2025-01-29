@@ -126,14 +126,14 @@ jobs:
           fi
           
           echo "Creating build directory..."
-          mkdir -p ../build
+          mkdir -p build
           
           echo "Zipping $BUILD_DIR contents..."
           cd $BUILD_DIR
-          zip -r ../../build/build.zip .
+          zip -r ../build/build.zip .
           
           echo "Checking zip file..."
-          cd ../../build
+          cd ../build
           ls -la
           echo "Zip file contents:"
           unzip -l build.zip
