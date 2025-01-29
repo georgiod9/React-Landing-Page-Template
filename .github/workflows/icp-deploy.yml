@@ -107,11 +107,18 @@ jobs:
           echo "Creating zip file..."
           echo "Current directory: $(pwd)"
           
-          BUILD_DIR=${{ steps.build.outputs.build_dir }}
-          if [ ! -d "$BUILD_DIR" ]; then
-            echo "Error: $BUILD_DIR directory not found!"
+          # Detect build directory directly
+          if [ -d "dist" ]; then
+            BUILD_DIR="dist"
+          elif [ -d "build" ]; then
+            BUILD_DIR="build"
+          else
+            echo "Error: Neither dist nor build directory found!"
+            ls -la
             exit 1
           fi
+          
+          echo "Found build directory: $BUILD_DIR"
           
           if [ -z "$(ls -A $BUILD_DIR)" ]; then
             echo "Error: $BUILD_DIR directory is empty!"
@@ -130,7 +137,7 @@ jobs:
           ls -la
           echo "Zip file contents:"
           unzip -l build.zip
-          
+        
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
