@@ -69,12 +69,40 @@ jobs:
           echo "Modified package.json scripts:"
           cat package.json | grep '"scripts"' -A 10
           
-          # Detect build tool from package.json
-          if grep -q '"vite"' package.json; then
-            echo "Detected Vite project"
+          # Detect build output directory based on framework
+          if grep -q '"@angular/core"' package.json; then
+            echo "Detected Angular project"
             BUILD_DIR="dist"
+          elif grep -q '"next"' package.json; then
+            echo "Detected Next.js project"
+            if grep -q '"output": *"export"' next.config.js 2>/dev/null || grep -q '"output": *"export"' package.json; then
+              BUILD_DIR="out"
+            else
+              BUILD_DIR=".next"
+            fi
+          elif grep -q '"nuxt"' package.json; then
+            echo "Detected Nuxt.js project"
+            # Check Nuxt version for different output directories
+            if grep -q '"nuxt3"' package.json || grep -q '"nuxt": *"3' package.json; then
+              BUILD_DIR=".output"
+            else
+              BUILD_DIR=".nuxt"
+              # For Nuxt static builds
+              if grep -q '"generate"' package.json; then
+                BUILD_DIR="dist"
+              fi
+            fi
           elif grep -q '"react-scripts"' package.json; then
             echo "Detected Create React App project"
+            BUILD_DIR="build"
+          elif grep -q '"vite"' package.json; then
+            echo "Detected Vite project"
+            BUILD_DIR="dist"
+          elif grep -q '"gatsby"' package.json; then
+            echo "Detected Gatsby project"
+            BUILD_DIR="public"
+          elif grep -q '"@sveltejs/kit"' package.json; then
+            echo "Detected SvelteKit project"
             BUILD_DIR="build"
           else
             echo "Using default build directory"
